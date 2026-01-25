@@ -1,0 +1,189 @@
+%PDF-1.3
+%‚„œ”
+1 0 obj
+<<
+/Producer (pypdf)
+>>
+endobj
+2 0 obj
+<<
+/Type /Pages
+/Count 2
+/Kids [ 4 0 R 8 0 R ]
+>>
+endobj
+3 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+4 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 5 0 R
+>>
+/ProcSet [ /ImageB /ImageC /ImageI /PDF /Text ]
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 7 0 R
+>>
+endobj
+5 0 obj
+<<
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+/Name /F1
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+6 0 obj
+<<
+/Length 1210
+>>
+stream
+q
+0.0 0.0 595.2756 841.8898 re
+W
+n
+1 0 0 1 0 0 cm
+BT
+/F1 12 Tf
+14.4 TL
+ET
+BT
+1 0 0 1 0 0 Tm
+1 0 0 1 72 720 Tm
+/F1 10 Tf
+12 TL
+(Journal of Testing\054 Vol\056 1\054 No\056 1 \0502025\051 pp\056 1\0552) Tj
+T*
+T*
+(A Dummy Paper for Testing the PDFHunter Pipeline and its Various Components) Tj
+T*
+T*
+(J\056 Doe\054 A\056 Nother\054 and S\056 Omeone) Tj
+T*
+T*
+(Abstract\072 This is a test paper designed to be processed by the PDFHunter system\056) Tj
+T*
+(It contains various bibliographic elements like a title\054 authors\054 journal information\054) Tj
+T*
+(and a year\056 The purpose is to ensure that the text extraction\054 rule\055based parsing\054) Tj
+T*
+(and LLM parsing all work together as expected within the main pipeline\056 We need) Tj
+T*
+(enough text to ensure this document is classified as a text\055based PDF and not a) Tj
+T*
+(scanned one\054 which would trigger the OCR path unnecessarily for this test case\056) Tj
+T*
+(Lorem ipsum dolor sit amet\054 consectetur adipiscing elit\054 sed do eiusmod tempor) Tj
+T*
+(incididunt ut labore et dolore magna aliqua\056 Ut enim ad minim veniam\054 quis nostrud) Tj
+T*
+(exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat\056) Tj
+T*
+ET
+Q
+
+endstream
+endobj
+7 0 obj
+[ 6 0 R ]
+endobj
+8 0 obj
+<<
+/Type /Page
+/Resources <<
+/Font <<
+/F1 9 0 R
+>>
+/ProcSet [ /ImageB /ImageC /ImageI /PDF /Text ]
+>>
+/MediaBox [ 0.0 0.0 612 792 ]
+/Parent 2 0 R
+/Contents 11 0 R
+>>
+endobj
+9 0 obj
+<<
+/BaseFont /Helvetica
+/Encoding /WinAnsiEncoding
+/Name /F1
+/Subtype /Type1
+/Type /Font
+>>
+endobj
+10 0 obj
+<<
+/Length 823
+>>
+stream
+q
+0.0 0.0 595.2756 841.8898 re
+W
+n
+1 0 0 1 0 0 cm
+BT
+/F1 12 Tf
+14.4 TL
+ET
+BT
+1 0 0 1 0 0 Tm
+1 0 0 1 72 720 Tm
+/F1 10 Tf
+12 TL
+(Introduction) Tj
+T*
+T*
+(This is the body of the paper\056 It continues on page two\056) Tj
+T*
+(Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu) Tj
+T*
+(fugiat nulla pariatur\056 Excepteur sint occaecat cupidatat non proident\054 sunt in) Tj
+T*
+(culpa qui officia deserunt mollit anim id est laborum\056 This additional text) Tj
+T*
+(is crucial for the document to exceed the text\055density threshold and be correctly) Tj
+T*
+(identified as a text\055based PDF\056 Without it\054 the test would fail by taking the) Tj
+T*
+(wrong processing path \050OCR instead of direct text extraction\051\056) Tj
+T*
+(\251 Some Publisher 2025\056 All rights reserved\056) Tj
+T*
+ET
+Q
+
+endstream
+endobj
+11 0 obj
+[ 10 0 R ]
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000054 00000 n 
+0000000119 00000 n 
+0000000168 00000 n 
+0000000348 00000 n 
+0000000455 00000 n 
+0000001717 00000 n 
+0000001742 00000 n 
+0000001923 00000 n 
+0000002030 00000 n 
+0000002905 00000 n 
+trailer
+<<
+/Size 12
+/Root 3 0 R
+/Info 1 0 R
+>>
+startxref
+2932
+%%EOF
