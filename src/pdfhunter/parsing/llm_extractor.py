@@ -44,19 +44,25 @@ class LLMExtractionSchema(BaseModel):
 
 @dataclass
 class LLMExtractionResult:
-    """Result of LLM extraction."""
+    """Result of LLM extraction with Zotero-compatible fields."""
 
+    # Zotero-compatible fields
     title: str | None = None
-    author: list[dict[str, str]] = field(default_factory=list)
-    container_title: str | None = None
-    abstract: str | None = None
+    author: list[dict[str, str]] = field(default_factory=list)  # [{lastName, firstName} or {name}]
+    container_title: str | None = None  # publicationTitle in Zotero
+    abstract: str | None = None  # abstractNote in Zotero
     language: str | None = None
-    type: str | None = None
+    type: str | None = None  # itemType in Zotero
     publisher: str | None = None
-    year: int | None = None
+    year: int | None = None  # date in Zotero
     volume: str | None = None
     issue: str | None = None
-    page: str | None = None
+    page: str | None = None  # pages in Zotero
+    series: str | None = None
+    series_number: str | None = None
+    doi: str | None = None
+    issn: str | None = None
+    isbn: str | None = None
 
     # Metadata
     model_used: str = ""
@@ -65,7 +71,7 @@ class LLMExtractionResult:
     raw_response: str = ""
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to dictionary."""
+        """Convert to dictionary (internal field names)."""
         result = {}
         if self.title:
             result["title"] = self.title
@@ -89,6 +95,63 @@ class LLMExtractionResult:
             result["issue"] = self.issue
         if self.page:
             result["page"] = self.page
+        if self.series:
+            result["series"] = self.series
+        if self.series_number:
+            result["series_number"] = self.series_number
+        if self.doi:
+            result["doi"] = self.doi
+        if self.issn:
+            result["issn"] = self.issn
+        if self.isbn:
+            result["isbn"] = self.isbn
+        return result
+
+    def to_zotero_dict(self) -> dict[str, Any]:
+        """Convert to Zotero-compatible dictionary."""
+        result: dict[str, Any] = {}
+        if self.type:
+            result["itemType"] = self.type
+        if self.title:
+            result["title"] = self.title
+        if self.author:
+            # Convert to Zotero creators format
+            creators = []
+            for a in self.author:
+                creator = {"creatorType": "author"}
+                if "lastName" in a or "family" in a:
+                    creator["lastName"] = a.get("lastName") or a.get("family", "")
+                    creator["firstName"] = a.get("firstName") or a.get("given", "")
+                elif "name" in a or "literal" in a:
+                    creator["name"] = a.get("name") or a.get("literal", "")
+                creators.append(creator)
+            result["creators"] = creators
+        if self.container_title:
+            result["publicationTitle"] = self.container_title
+        if self.abstract:
+            result["abstractNote"] = self.abstract
+        if self.language:
+            result["language"] = self.language
+        if self.publisher:
+            result["publisher"] = self.publisher
+        if self.year:
+            result["date"] = str(self.year)
+        if self.volume:
+            result["volume"] = self.volume
+        if self.issue:
+            result["issue"] = self.issue
+        if self.page:
+            result["pages"] = self.page
+        if self.series:
+            result["series"] = self.series
+        if self.series_number:
+            result["seriesNumber"] = self.series_number
+        if self.doi:
+            result["DOI"] = self.doi
+        if self.issn:
+            result["ISSN"] = self.issn
+        if self.isbn:
+            result["ISBN"] = self.isbn
         return result
 
     def has_author(self) -> bool:
@@ -100,33 +163,40 @@ class LLMExtractionResult:
         return self.title is not None and len(self.title) > 0
 
 
-EXTRACTION_PROMPT = """You are a bibliographic metadata extraction expert. Extract bibliographic information from the following text, which comes from a PDF document (possibly OCR'd).
+EXTRACTION_PROMPT = """You are a bibliographic metadata extraction expert. Extract bibliographic information from the following text for importing into Zotero reference manager.
 
 TEXT:
 {text}
 
-Extract the following fields if present:
-1. title: The title of the work (article, book, report, etc.)
-2. author: List of authors with family (last) name and given (first) name(s)
-3. container_title: The journal, book, or series title if this is an article or chapter
-4. abstract: The abstract if present
-5. language: The primary language of the document (use ISO 639-1 codes: en, fr, ru, de, etc.)
-6. type: One of: article, book, chapter, report, thesis, proceedings
-7. publisher: Name of the publisher
-8. year: Publication year (4-digit integer, e.g., 2011)
-9. volume: Volume number (e.g., "23" or "XXIII")
-10. issue: Issue number (e.g., "4" or "2-3")
-11. page: Page range (e.g., "1-25" or "123-145")
+{pdf_metadata}
+
+Extract the following Zotero-compatible fields:
+1. itemType: One of: journalArticle, book, bookSection, conferencePaper, report, thesis, patent, webpage
+2. title: The title of the work
+3. creators: List of authors with lastName and firstName
+4. publicationTitle: Journal name (for journalArticle) or book title (for bookSection)
+5. abstractNote: The abstract if present
+6. language: Primary language (ISO 639-1: en, fr, ru, de, etc.)
+7. publisher: Publisher name
+8. date: Publication year (4-digit integer)
+9. volume: Volume number
+10. issue: Issue number
+11. pages: Page range (e.g., "1-25")
+12. series: Series name if applicable
+13. seriesNumber: Series number if applicable
+14. DOI: Digital Object Identifier if present
+15. ISSN: For journals
+16. ISBN: For books
 
 Important guidelines:
-- For authors, try to separate family and given names. If unclear, use the "literal" field.
+- For creators, separate lastName and firstName. If unclear, use "name" field for full name.
 - For Cyrillic names, preserve the original script.
 - If a field is not present or unclear, leave it as null.
 - The title should not include subtitle indicators like volume numbers or dates.
-- Container_title is the journal or series name, not the article title.
-- Page should be formatted as "start-end" (e.g., "1-25").
+- publicationTitle is the journal/book name, not the article title.
+- pages should be formatted as "start-end" (e.g., "1-25").
 
-CRITICAL for year extraction:
+CRITICAL for date/year extraction:
 - Extract the PUBLICATION YEAR of THIS document, NOT years from cited references.
 - Years appearing as "Author (1990)" or "Smith 1985" are CITATIONS to other works - ignore these.
 - Look for the publication year in:
@@ -137,54 +207,66 @@ CRITICAL for year extraction:
 - If multiple years appear, prefer the one associated with journal/volume/page info.
 - Year should be an integer (just the number, not "2011년" or "2011年").
 
-Respond with a JSON object matching this schema:
+Respond with a JSON object matching this Zotero-compatible schema:
 {{
+  "itemType": "journalArticle|book|bookSection|conferencePaper|report|thesis",
   "title": "string or null",
-  "author": [
-    {{"family": "string", "given": "string"}} or {{"literal": "string"}}
+  "creators": [
+    {{"lastName": "string", "firstName": "string", "creatorType": "author"}} or {{"name": "string", "creatorType": "author"}}
   ],
-  "container_title": "string or null",
-  "abstract": "string or null",
+  "publicationTitle": "string or null",
+  "abstractNote": "string or null",
   "language": "string or null",
-  "type": "string or null",
   "publisher": "string or null",
-  "year": integer or null,
+  "date": integer or null,
   "volume": "string or null",
   "issue": "string or null",
-  "page": "string or null"
+  "pages": "string or null",
+  "series": "string or null",
+  "seriesNumber": "string or null",
+  "DOI": "string or null",
+  "ISSN": "string or null",
+  "ISBN": "string or null"
 }}
 """
 
-EXTRACTION_PROMPT_WITH_IMAGE = """You are a bibliographic metadata extraction expert. Extract bibliographic information from the document page image(s) provided, along with the extracted text below.
+EXTRACTION_PROMPT_WITH_IMAGE = """You are a bibliographic metadata extraction expert. Extract bibliographic information from the document page image(s) provided for importing into Zotero reference manager.
 
 TEXT (OCR or extracted):
 {text}
 
-Look at the image(s) carefully to extract the following fields. The image may contain information that was not correctly captured in the text (especially for headers, footers, and formatted sections).
+{pdf_metadata}
 
-Extract the following fields if present:
-1. title: The title of the work (article, book, report, etc.)
-2. author: List of authors with family (last) name and given (first) name(s)
-3. container_title: The journal, book, or series title if this is an article or chapter
-4. abstract: The abstract if present
-5. language: The primary language of the document (use ISO 639-1 codes: en, fr, ru, de, etc.)
-6. type: One of: article, book, chapter, report, thesis, proceedings
-7. publisher: Name of the publisher
-8. year: Publication year (4-digit integer, e.g., 2011)
-9. volume: Volume number (e.g., "23" or "XXIII")
-10. issue: Issue number (e.g., "4" or "2-3")
-11. page: Page range (e.g., "1-25" or "123-145")
+Look at the image(s) carefully to extract bibliographic metadata. The image may contain information that was not correctly captured in the text (especially for headers, footers, and formatted sections like journal citation blocks).
+
+Extract the following Zotero-compatible fields:
+1. itemType: One of: journalArticle, book, bookSection, conferencePaper, report, thesis, patent, webpage
+2. title: The title of the work
+3. creators: List of authors with lastName and firstName
+4. publicationTitle: Journal name (for journalArticle) or book title (for bookSection)
+5. abstractNote: The abstract if present
+6. language: Primary language (ISO 639-1: en, fr, ru, de, etc.)
+7. publisher: Publisher name
+8. date: Publication year (4-digit integer)
+9. volume: Volume number
+10. issue: Issue number
+11. pages: Page range (e.g., "1-25")
+12. series: Series name if applicable
+13. seriesNumber: Series number if applicable
+14. DOI: Digital Object Identifier if present
+15. ISSN: For journals
+16. ISBN: For books
 
 Important guidelines:
-- For authors, try to separate family and given names. If unclear, use the "literal" field.
+- For creators, separate lastName and firstName. If unclear, use "name" field for full name.
 - For Cyrillic names, preserve the original script.
 - If a field is not present or unclear, leave it as null.
 - The title should not include subtitle indicators like volume numbers or dates.
-- Container_title is the journal or series name, not the article title.
-- Page should be formatted as "start-end" (e.g., "1-25").
+- publicationTitle is the journal/book name, not the article title.
+- pages should be formatted as "start-end" (e.g., "1-25").
 - Pay special attention to journal header/footer information (often contains volume, issue, year, pages).
 
-CRITICAL for year extraction:
+CRITICAL for date/year extraction:
 - Extract the PUBLICATION YEAR of THIS document, NOT years from cited references.
 - Years appearing as "Author (1990)" or "Smith 1985" are CITATIONS to other works - ignore these.
 - Look for the publication year in:
@@ -195,21 +277,26 @@ CRITICAL for year extraction:
 - If multiple years appear, prefer the one associated with journal/volume/page info.
 - Year should be an integer (just the number, not "2011년" or "2011年").
 
-Respond with a JSON object matching this schema:
+Respond with a JSON object matching this Zotero-compatible schema:
 {{
+  "itemType": "journalArticle|book|bookSection|conferencePaper|report|thesis",
   "title": "string or null",
-  "author": [
-    {{"family": "string", "given": "string"}} or {{"literal": "string"}}
+  "creators": [
+    {{"lastName": "string", "firstName": "string", "creatorType": "author"}} or {{"name": "string", "creatorType": "author"}}
   ],
-  "container_title": "string or null",
-  "abstract": "string or null",
+  "publicationTitle": "string or null",
+  "abstractNote": "string or null",
   "language": "string or null",
-  "type": "string or null",
   "publisher": "string or null",
-  "year": integer or null,
+  "date": integer or null,
   "volume": "string or null",
   "issue": "string or null",
-  "page": "string or null"
+  "pages": "string or null",
+  "series": "string or null",
+  "seriesNumber": "string or null",
+  "DOI": "string or null",
+  "ISSN": "string or null",
+  "ISBN": "string or null"
 }}
 """
 
@@ -272,12 +359,18 @@ class LLMExtractor:
                 self._client = Anthropic()  # Uses ANTHROPIC_API_KEY env var
         return self._client
 
-    def extract(self, text: str, max_text_length: int = 4000) -> LLMExtractionResult:
+    def extract(
+        self,
+        text: str,
+        max_text_length: int = 4000,
+        pdf_metadata: dict | None = None,
+    ) -> LLMExtractionResult:
         """Extract bibliographic fields from text.
 
         Args:
             text: Text to extract from
             max_text_length: Maximum text length to send to LLM
+            pdf_metadata: Optional PDF metadata dict to include in prompt
 
         Returns:
             LLMExtractionResult with extracted fields
@@ -286,7 +379,24 @@ class LLMExtractor:
         if len(text) > max_text_length:
             text = text[:max_text_length] + "..."
 
-        prompt = EXTRACTION_PROMPT.format(text=text)
+        # Format PDF metadata if available
+        pdf_meta_str = ""
+        if pdf_metadata:
+            meta_parts = []
+            if pdf_metadata.get("title"):
+                meta_parts.append(f"PDF Title: {pdf_metadata['title']}")
+            if pdf_metadata.get("author"):
+                meta_parts.append(f"PDF Author: {pdf_metadata['author']}")
+            if pdf_metadata.get("subject"):
+                meta_parts.append(f"PDF Subject: {pdf_metadata['subject']}")
+            if pdf_metadata.get("keywords"):
+                meta_parts.append(f"PDF Keywords: {pdf_metadata['keywords']}")
+            if pdf_metadata.get("creation_date"):
+                meta_parts.append(f"PDF Creation Date: {pdf_metadata['creation_date']}")
+            if meta_parts:
+                pdf_meta_str = "PDF METADATA (use as hints, may be incomplete or incorrect):\n" + "\n".join(meta_parts)
+
+        prompt = EXTRACTION_PROMPT.format(text=text, pdf_metadata=pdf_meta_str)
 
         if self.provider == "openai":
             return self._extract_openai(prompt)
@@ -298,6 +408,7 @@ class LLMExtractor:
         text: str,
         images: list,  # list of PIL.Image objects
         max_text_length: int = 4000,
+        pdf_metadata: dict | None = None,
     ) -> LLMExtractionResult:
         """Extract bibliographic fields from text and images.
 
@@ -305,18 +416,36 @@ class LLMExtractor:
             text: Text to extract from
             images: List of PIL Image objects (page images)
             max_text_length: Maximum text length to send to LLM
+            pdf_metadata: Optional PDF metadata dict to include in prompt
 
         Returns:
             LLMExtractionResult with extracted fields
         """
         if not images:
-            return self.extract(text, max_text_length)
+            return self.extract(text, max_text_length, pdf_metadata)
 
         # Truncate text if needed
         if len(text) > max_text_length:
             text = text[:max_text_length] + "..."
 
-        prompt = EXTRACTION_PROMPT_WITH_IMAGE.format(text=text)
+        # Format PDF metadata if available
+        pdf_meta_str = ""
+        if pdf_metadata:
+            meta_parts = []
+            if pdf_metadata.get("title"):
+                meta_parts.append(f"PDF Title: {pdf_metadata['title']}")
+            if pdf_metadata.get("author"):
+                meta_parts.append(f"PDF Author: {pdf_metadata['author']}")
+            if pdf_metadata.get("subject"):
+                meta_parts.append(f"PDF Subject: {pdf_metadata['subject']}")
+            if pdf_metadata.get("keywords"):
+                meta_parts.append(f"PDF Keywords: {pdf_metadata['keywords']}")
+            if pdf_metadata.get("creation_date"):
+                meta_parts.append(f"PDF Creation Date: {pdf_metadata['creation_date']}")
+            if meta_parts:
+                pdf_meta_str = "PDF METADATA (use as hints, may be incomplete or incorrect):\n" + "\n".join(meta_parts)
+
+        prompt = EXTRACTION_PROMPT_WITH_IMAGE.format(text=text, pdf_metadata=pdf_meta_str)
 
         if self.provider == "openai":
             return self._extract_openai_with_images(prompt, images)
@@ -492,7 +621,7 @@ class LLMExtractor:
         return result
 
     def _parse_response(self, response: str) -> LLMExtractionResult:
-        """Parse LLM response into result object."""
+        """Parse LLM response into result object (handles both old and Zotero field names)."""
         result = LLMExtractionResult()
 
         try:
@@ -506,35 +635,93 @@ class LLMExtractor:
 
             data = json.loads(response)
 
+            # Title
             result.title = data.get("title")
-            result.container_title = data.get("container_title")
-            result.abstract = data.get("abstract")
+
+            # Container title (Zotero: publicationTitle, old: container_title)
+            result.container_title = data.get("publicationTitle") or data.get("container_title")
+
+            # Abstract (Zotero: abstractNote, old: abstract)
+            result.abstract = data.get("abstractNote") or data.get("abstract")
+
             result.language = data.get("language")
-            result.type = data.get("type")
+
+            # Type (Zotero: itemType, old: type)
+            item_type = data.get("itemType") or data.get("type")
+            if item_type:
+                # Map Zotero itemType to internal type
+                type_mapping = {
+                    "journalArticle": "article",
+                    "book": "book",
+                    "bookSection": "chapter",
+                    "conferencePaper": "paper-conference",
+                    "report": "report",
+                    "thesis": "thesis",
+                    "patent": "patent",
+                    "webpage": "webpage",
+                }
+                result.type = type_mapping.get(item_type, item_type)
+
             result.publisher = data.get("publisher")
             result.volume = data.get("volume")
             result.issue = data.get("issue")
-            result.page = data.get("page")
 
-            # Parse year (ensure it's an integer)
-            year_val = data.get("year")
+            # Pages (Zotero: pages, old: page)
+            result.page = data.get("pages") or data.get("page")
+
+            # Series
+            result.series = data.get("series")
+            result.series_number = data.get("seriesNumber") or data.get("series_number")
+
+            # Identifiers
+            result.doi = data.get("DOI") or data.get("doi")
+            result.issn = data.get("ISSN") or data.get("issn")
+            result.isbn = data.get("ISBN") or data.get("isbn")
+
+            # Parse year/date (Zotero: date, old: year)
+            year_val = data.get("date") or data.get("year")
             if year_val is not None:
                 if isinstance(year_val, int):
                     result.year = year_val
-                elif isinstance(year_val, str) and year_val.isdigit():
-                    result.year = int(year_val)
+                elif isinstance(year_val, str):
+                    # Try to extract year from date string
+                    year_str = year_val.strip()
+                    if year_str.isdigit() and len(year_str) == 4:
+                        result.year = int(year_str)
+                    else:
+                        # Try to find 4-digit year in string
+                        import re
+                        match = re.search(r'\b(19|20)\d{2}\b', year_str)
+                        if match:
+                            result.year = int(match.group())
 
-            # Parse author
-            author_data = data.get("author", [])
-            for author in author_data:
+            # Parse authors/creators
+            # Zotero format: creators with lastName/firstName or name
+            # Old format: author with family/given or literal
+            creators = data.get("creators", [])
+            authors = data.get("author", [])
+
+            for creator in creators:
+                if isinstance(creator, dict):
+                    author_dict = {}
+                    if creator.get("lastName"):
+                        author_dict["family"] = creator["lastName"]
+                    if creator.get("firstName"):
+                        author_dict["given"] = creator["firstName"]
+                    if creator.get("name"):
+                        author_dict["literal"] = creator["name"]
+                    if author_dict:
+                        result.author.append(author_dict)
+
+            for author in authors:
                 if isinstance(author, dict):
                     author_dict = {}
-                    if author.get("family"):
-                        author_dict["family"] = author["family"]
-                    if author.get("given"):
-                        author_dict["given"] = author["given"]
-                    if author.get("literal"):
-                        author_dict["literal"] = author["literal"]
+                    if author.get("family") or author.get("lastName"):
+                        author_dict["family"] = author.get("family") or author.get("lastName")
+                    if author.get("given") or author.get("firstName"):
+                        author_dict["given"] = author.get("given") or author.get("firstName")
+                    if author.get("literal") or author.get("name"):
+                        author_dict["literal"] = author.get("literal") or author.get("name")
                     if author_dict:
                         result.author.append(author_dict)
 

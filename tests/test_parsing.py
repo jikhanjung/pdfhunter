@@ -496,7 +496,7 @@ class TestLLMExtractor:
         # Mock the _extract_openai method to avoid actual API call
         called_with_text = []
 
-        def mock_extract(text, max_text_length=4000):
+        def mock_extract(text, max_text_length=4000, pdf_metadata=None):
             called_with_text.append(text)
             return LLMExtractionResult(title="Mocked")
 

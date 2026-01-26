@@ -1,4 +1,4 @@
-"""Export modules for CSL-JSON, RIS, BibTeX."""
+"""Export modules for CSL-JSON, RIS, BibTeX, Zotero JSON."""
 
 from pdfhunter.export.bibtex import (
     escape_bibtex,
@@ -21,6 +21,12 @@ from pdfhunter.export.ris import (
     record_to_ris,
     records_to_ris,
 )
+from pdfhunter.export.zotero_json import (
+    export_zotero_json,
+    export_zotero_json_string,
+    record_to_zotero_json,
+    records_to_zotero_json,
+)
 
 __all__ = [
     # CSL-JSON
@@ -41,4 +47,9 @@ __all__ = [
     "generate_cite_key",
     "record_to_bibtex",
     "records_to_bibtex",
+    # Zotero JSON
+    "export_zotero_json",
+    "export_zotero_json_string",
+    "record_to_zotero_json",
+    "records_to_zotero_json",
 ]

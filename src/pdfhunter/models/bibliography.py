@@ -144,6 +144,87 @@ class BibliographyRecord(BaseModel):
 
         return result
 
+    def to_zotero_json(self) -> dict[str, Any]:
+        """Convert to Zotero-compatible JSON format."""
+        # Map internal type to Zotero itemType
+        type_mapping = {
+            "article": "journalArticle",
+            "article-journal": "journalArticle",
+            "book": "book",
+            "chapter": "bookSection",
+            "paper-conference": "conferencePaper",
+            "report": "report",
+            "thesis": "thesis",
+            "patent": "patent",
+            "webpage": "webpage",
+        }
+
+        result: dict[str, Any] = {
+            "itemType": type_mapping.get(self.type, "journalArticle"),
+        }
+
+        if self.title:
+            result["title"] = self.title
+
+        # Convert authors to Zotero creators format
+        if self.author:
+            creators = []
+            for a in self.author:
+                creator: dict[str, str] = {"creatorType": "author"}
+                if a.literal:
+                    creator["name"] = a.literal
+                else:
+                    if a.family:
+                        creator["lastName"] = a.family
+                    if a.given:
+                        creator["firstName"] = a.given
+                creators.append(creator)
+            result["creators"] = creators
+
+        if self.issued and self.issued.year:
+            result["date"] = str(self.issued.year)
+
+        if self.container_title:
+            # Use appropriate field based on item type
+            if result["itemType"] == "journalArticle":
+                result["publicationTitle"] = self.container_title
+            elif result["itemType"] == "bookSection":
+                result["bookTitle"] = self.container_title
+            else:
+                result["publicationTitle"] = self.container_title
+
+        if self.volume:
+            result["volume"] = self.volume
+        if self.issue:
+            result["issue"] = self.issue
+        if self.page:
+            result["pages"] = self.page
+
+        if self.publisher:
+            result["publisher"] = self.publisher
+        if self.publisher_place:
+            result["place"] = self.publisher_place
+
+        if self.collection_title:
+            result["series"] = self.collection_title
+        if self.collection_number:
+            result["seriesNumber"] = self.collection_number
+
+        if self.doi:
+            result["DOI"] = self.doi
+        if self.issn:
+            result["ISSN"] = self.issn
+        if self.isbn:
+            result["ISBN"] = self.isbn
+
+        if self.language:
+            result["language"] = self.language
+
+        if self.abstract:
+            result["abstractNote"] = self.abstract
+
+        return result
+
     def get_evidence_for_field(self, field_name: str) -> list[Evidence]:
         """Get all evidence records for a specific field."""
         return [e for e in self.evidence if e.field_name == field_name]

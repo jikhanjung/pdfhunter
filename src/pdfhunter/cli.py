@@ -13,10 +13,11 @@ from pdfhunter.core.config import Config
 from pdfhunter.core.document import Document
 from pdfhunter.core.pipeline import Pipeline
 from pdfhunter.extraction.page_selector import PageSelector
-from pdfhunter.export import export_csl_json, export_ris, export_bibtex
+from pdfhunter.export import export_csl_json, export_ris, export_bibtex, export_zotero_json
 from pdfhunter.export.csl_json import export_csl_json_string
 from pdfhunter.export.ris import export_ris_string
 from pdfhunter.export.bibtex import export_bibtex_string
+from pdfhunter.export.zotero_json import export_zotero_json_string
 from pdfhunter.models.bibliography import RecordStatus
 from pdfhunter.utils.logging import setup_logging
 
@@ -30,11 +31,14 @@ console = Console()
 
 @app.callback()
 def main(
+    ctx: typer.Context,
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
 ):
     """PDFHunter: Extract bibliographic metadata from PDFs."""
     log_level = "DEBUG" if verbose else "INFO"
     setup_logging(level=log_level)
+    ctx.ensure_object(dict)
+    ctx.obj["verbose"] = verbose
 
 
 @app.command()
@@ -88,21 +92,24 @@ def info(
 
 @app.command()
 def extract(
+    ctx: typer.Context,
     file_path: Path = typer.Argument(..., help="Path to PDF or image file"),
     output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file path"),
-    format: str = typer.Option("csl-json", "--format", "-f", help="Output format: csl-json, ris, bibtex"),
+    format: str = typer.Option("csl-json", "--format", "-f", help="Output format: csl-json, ris, bibtex, zotero"),
     provider: Optional[str] = typer.Option(None, "--provider", "-p", help="LLM provider: openai, anthropic"),
     model: Optional[str] = typer.Option(None, "--model", "-m", help="LLM model: gpt-4o-mini, gpt-5.1, gpt-5.2, etc."),
     mock_llm: bool = typer.Option(False, "--mock-llm", help="Use mock LLM for testing"),
     no_web_search: bool = typer.Option(False, "--no-web-search", help="Disable web search enrichment"),
 ):
     """Extract bibliographic metadata from a document."""
+    verbose = ctx.obj.get("verbose", False) if ctx.obj else False
+
     if not file_path.exists():
         console.print(f"[red]Error: File not found: {file_path}[/red]")
         raise typer.Exit(1)
 
     # Validate format
-    valid_formats = ["csl-json", "ris", "bibtex"]
+    valid_formats = ["csl-json", "ris", "bibtex", "zotero"]
     if format not in valid_formats:
         console.print(f"[red]Error: Invalid format '{format}'. Choose from: {', '.join(valid_formats)}[/red]")
         raise typer.Exit(1)
@@ -123,8 +130,12 @@ def extract(
                 config.llm.provider = provider
             if model:
                 config.llm.model = model
-            pipeline = Pipeline(config=config, use_mock_llm=mock_llm)
+            pipeline = Pipeline(config=config, use_mock_llm=mock_llm, verbose=verbose)
             record = pipeline.run(doc)
+
+        # Display verbose debug info if requested
+        if verbose and pipeline.debug_info:
+            _display_debug_info(pipeline.debug_info)
 
         # Display results
         _display_record(record)
@@ -142,6 +153,65 @@ def extract(
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
         raise typer.Exit(1)
+
+
+def _display_debug_info(debug_info):
+    """Display debug information from the extraction pipeline."""
+    from rich.panel import Panel
+    from rich.json import JSON
+
+    console.print("\n[bold yellow]═══ Debug Information ═══[/bold yellow]\n")
+
+    # PDF metadata
+    if debug_info.pdf_metadata:
+        console.print("[bold cyan]PDF Metadata:[/bold cyan]")
+        for field, value in debug_info.pdf_metadata.items():
+            if value:
+                console.print(f"  {field}: {value}")
+        console.print()
+
+    # Rule-based results summary
+    if debug_info.rule_based_results:
+        console.print("[bold cyan]Rule-based Extraction:[/bold cyan]")
+        for i, result in enumerate(debug_info.rule_based_results):
+            if result:
+                fields = {k: v for k, v in result.items() if v and k not in ["matches", "source_text"]}
+                if fields:
+                    console.print(f"  Page {i+1}: {fields}")
+
+    # LLM text extraction
+    if debug_info.llm_text_result:
+        console.print("\n[bold cyan]LLM Text Extraction:[/bold cyan]")
+        table = Table(show_header=False, box=None, padding=(0, 2))
+        table.add_column("Field", style="dim")
+        table.add_column("Value")
+        for field, value in debug_info.llm_text_result.items():
+            if value:
+                table.add_row(field, str(value)[:80])
+        console.print(table)
+
+    # LLM vision extraction
+    if debug_info.llm_vision_result:
+        console.print("\n[bold cyan]LLM Vision Extraction:[/bold cyan]")
+        table = Table(show_header=False, box=None, padding=(0, 2))
+        table.add_column("Field", style="dim")
+        table.add_column("Value")
+        for field, value in debug_info.llm_vision_result.items():
+            if value:
+                table.add_row(field, str(value)[:80])
+        console.print(table)
+
+    # Conflicts
+    if debug_info.conflicts:
+        console.print("\n[bold red]Conflicts Detected:[/bold red]")
+        for conflict in debug_info.conflicts:
+            console.print(
+                f"  [yellow]{conflict['field']}[/yellow]: "
+                f"text='{conflict['text_value']}' vs vision='{conflict['vision_value']}' "
+                f"[dim](using vision)[/dim]"
+            )
+
+    console.print("\n[dim]─" * 50 + "[/dim]\n")
 
 
 def _display_record(record):
@@ -203,6 +273,8 @@ def _format_record(record, format: str) -> str:
         return export_ris_string(record)
     elif format == "bibtex":
         return export_bibtex_string(record)
+    elif format == "zotero":
+        return export_zotero_json_string(record, indent=2)
     return ""
 
 
@@ -214,6 +286,8 @@ def _export_record(record, output_path: Path, format: str) -> None:
         export_ris(record, output_path)
     elif format == "bibtex":
         export_bibtex(record, output_path)
+    elif format == "zotero":
+        export_zotero_json(record, output_path)
 
 
 if __name__ == "__main__":

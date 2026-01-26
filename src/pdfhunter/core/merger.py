@@ -12,10 +12,15 @@ class Merger:
 
     def __init__(self):
         """Initializes the merger."""
+        # Priority order for each field: first source in list takes precedence
+        # LLM (especially vision) is more reliable for year extraction
+        # because rule-based often picks up citation years instead of publication year
         self.field_priority = {
             "doi": ["rule"], "issn": ["rule"], "isbn": ["rule"],
-            "year": ["rule", "llm"], "volume": ["rule", "llm"],
-            "issue": ["rule", "llm"], "page": ["rule", "llm"],
+            "year": ["llm", "rule"],  # LLM first - better at distinguishing pub year from citations
+            "volume": ["llm", "rule"],
+            "issue": ["llm", "rule"],
+            "page": ["llm", "rule"],
             "title": ["llm", "rule"], "author": ["llm"],
             "container_title": ["llm", "rule"], "abstract": ["llm"],
             "type": ["llm"],

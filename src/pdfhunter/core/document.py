@@ -34,12 +34,33 @@ class DocumentMetadata(BaseModel):
     document_type: DocumentType
     page_count: int
     pages: list[PageInfo] = Field(default_factory=list)
-    creation_date: str | None = None
-    modification_date: str | None = None
-    author: str | None = None
-    title: str | None = None
     has_text_layer: bool = False
     file_size_bytes: int = 0
+
+    # PDF metadata fields
+    title: str | None = None
+    author: str | None = None
+    subject: str | None = None
+    keywords: str | None = None
+    creator: str | None = None  # Application that created the document
+    producer: str | None = None  # PDF producer
+    creation_date: str | None = None
+    modification_date: str | None = None
+
+    def has_useful_metadata(self) -> bool:
+        """Check if PDF has useful bibliographic metadata."""
+        return bool(self.title or self.author or self.subject)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert metadata to dictionary for debugging."""
+        return {
+            "title": self.title,
+            "author": self.author,
+            "subject": self.subject,
+            "keywords": self.keywords,
+            "creator": self.creator,
+            "creation_date": self.creation_date,
+        }
 
 
 class Document:
@@ -129,18 +150,31 @@ class Document:
         # Consider it a text PDF if average text per page > 100 chars
         has_text_layer = (total_text_length / len(pages)) > 100 if pages else False
 
+        # Extract all available PDF metadata
+        def clean_metadata(value: Any) -> str | None:
+            """Clean metadata value, removing empty strings."""
+            if value is None:
+                return None
+            s = str(value).strip()
+            return s if s else None
+
         return DocumentMetadata(
             filename=self.file_path.name,
             file_path=self.file_path,
             document_type=DocumentType.TEXT_PDF if has_text_layer else DocumentType.SCANNED_PDF,
             page_count=len(pages),
             pages=pages,
-            creation_date=str(pdf_metadata.get("/CreationDate", "")),
-            modification_date=str(pdf_metadata.get("/ModDate", "")),
-            author=str(pdf_metadata.get("/Author", "")) or None,
-            title=str(pdf_metadata.get("/Title", "")) or None,
             has_text_layer=has_text_layer,
             file_size_bytes=file_size,
+            # PDF metadata fields
+            title=clean_metadata(pdf_metadata.get("/Title")),
+            author=clean_metadata(pdf_metadata.get("/Author")),
+            subject=clean_metadata(pdf_metadata.get("/Subject")),
+            keywords=clean_metadata(pdf_metadata.get("/Keywords")),
+            creator=clean_metadata(pdf_metadata.get("/Creator")),
+            producer=clean_metadata(pdf_metadata.get("/Producer")),
+            creation_date=clean_metadata(pdf_metadata.get("/CreationDate")),
+            modification_date=clean_metadata(pdf_metadata.get("/ModDate")),
         )
 
     def _load_image_metadata(self) -> DocumentMetadata:
