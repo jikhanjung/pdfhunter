@@ -124,8 +124,18 @@ Important guidelines:
 - If a field is not present or unclear, leave it as null.
 - The title should not include subtitle indicators like volume numbers or dates.
 - Container_title is the journal or series name, not the article title.
-- Year should be an integer (just the number, not "2011년" or "2011年").
 - Page should be formatted as "start-end" (e.g., "1-25").
+
+CRITICAL for year extraction:
+- Extract the PUBLICATION YEAR of THIS document, NOT years from cited references.
+- Years appearing as "Author (1990)" or "Smith 1985" are CITATIONS to other works - ignore these.
+- Look for the publication year in:
+  * Journal citation blocks like "[Palaeontology, Vol.10, 1967, pp. 214-44]"
+  * Copyright notices like "© 2020"
+  * Header/footer areas with journal info and date
+  * Near volume/issue/page information
+- If multiple years appear, prefer the one associated with journal/volume/page info.
+- Year should be an integer (just the number, not "2011년" or "2011年").
 
 Respond with a JSON object matching this schema:
 {{
@@ -171,9 +181,19 @@ Important guidelines:
 - If a field is not present or unclear, leave it as null.
 - The title should not include subtitle indicators like volume numbers or dates.
 - Container_title is the journal or series name, not the article title.
-- Year should be an integer (just the number, not "2011년" or "2011年").
 - Page should be formatted as "start-end" (e.g., "1-25").
-- Pay special attention to journal header information (often contains volume, issue, year, pages).
+- Pay special attention to journal header/footer information (often contains volume, issue, year, pages).
+
+CRITICAL for year extraction:
+- Extract the PUBLICATION YEAR of THIS document, NOT years from cited references.
+- Years appearing as "Author (1990)" or "Smith 1985" are CITATIONS to other works - ignore these.
+- Look for the publication year in:
+  * Journal citation blocks like "[Palaeontology, Vol.10, 1967, pp. 214-44]"
+  * Copyright notices like "© 2020"
+  * Header/footer areas with journal info and date
+  * Near volume/issue/page information
+- If multiple years appear, prefer the one associated with journal/volume/page info.
+- Year should be an integer (just the number, not "2011년" or "2011年").
 
 Respond with a JSON object matching this schema:
 {{
