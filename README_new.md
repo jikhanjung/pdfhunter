@@ -128,23 +128,23 @@ docs/
 ```mermaid
 flowchart TB
 
-A[Input<br/>PDF: born-digital | scanned | hybrid<br/>Optional single image] --> B[Initial Analysis<br/>page count<br/>filename / created date<br/>text-layer detection<br/>quick DOI sniff]
+A[Input<br/>PDF: born-digital, scanned, or hybrid<br/>Optional single image] --> B[Initial Analysis<br/>page count<br/>filename and created date<br/>text-layer detection<br/>quick DOI sniff]
 
 B --> C[Select Candidate Pages<br/>default: p1, p2, last<br/>optional: p3, last-1, TOC]
-C --> D[Render Pages<br/>low-res for structure<br/>hi-res 200–300dpi for OCR & evidence]
+C --> D[Render Pages<br/>low-res for structure<br/>hi-res 200 to 300 dpi for OCR and evidence]
 
 D --> E{Text Layer Sufficient?}
 E -- Yes --> F[Text Extraction<br/>per-page text blocks]
-E -- No --> G[OCR<br/>multi-language<br/>per-page text + optional bboxes]
+E -- No --> G[OCR<br/>multi-language<br/>per-page text plus optional bboxes]
 
 F --> H[Regex and Rules<br/>DOI, year, pages<br/>volume, issue, series, place]
 G --> H
 
-D --> I[Vision Extraction (Image-first)<br/>title, authors, journal, year, DOI<br/>evidence from p1 / p2 / last]
+D --> I[Vision Extraction Image-first<br/>title, authors, journal, year, DOI<br/>evidence from p1, p2, last]
 
-H --> J[LLM Text Parsing<br/>structured JSON<br/>evidence and confidence<br/>input limited to p1 / p2 / last]
+H --> J[LLM Text Parsing<br/>structured JSON<br/>evidence and confidence<br/>input limited to p1, p2, last]
 
-H --> K[External Bibliographic DB<br/>Crossref primary<br/>OpenAlex optional<br/>query: DOI or title+author+year]
+H --> K[External Bibliographic DB<br/>Crossref primary<br/>OpenAlex optional<br/>query by DOI or title author year]
 I --> K
 J --> K
 
@@ -162,7 +162,7 @@ O --> C
 N -- No --> P[Finalize Record<br/>CSL-JSON, RIS, BibTeX<br/>evidence bundle<br/>status assigned]
 
 M --> Q{Need Web Augmentation?}
-Q -- Yes --> R[Web Search Fallback<br/>title + author + year<br/>keep original language<br/>store evidence]
+Q -- Yes --> R[Web Search Fallback<br/>title, author, year<br/>keep original language<br/>store evidence]
 R --> L
 Q -- No --> N
 
