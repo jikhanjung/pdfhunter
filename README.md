@@ -21,7 +21,7 @@
 * 에이전트가 **무엇을 언제 실행하는가**를 정의
 * 페이지 선택, OCR/Vision 실행, 재시도, 웹 검색 등
 
-📄 문서: `agent-flow.md`
+📄 문서: `AGENT_FLOW.md`
 
 ---
 
@@ -30,7 +30,7 @@
 * 여러 후보 중 **어떤 정보를 신뢰할 것인가**를 정의
 * 출처 우선순위, confidence 계산, 충돌 해결
 
-📄 문서: `decision-policy.md`
+📄 문서: `DECISION_POLICY.md`
 
 ---
 
