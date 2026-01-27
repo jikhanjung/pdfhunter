@@ -17,16 +17,18 @@
 본 시스템은 의도적으로 **두 개의 독립적인 레이어**로 구성된다.
 
 ### 1. Agent Flow (행동 레이어)
-- 에이전트가 **무엇을 언제 실행하는가**를 정의
-- 페이지 선택, OCR/Vision 실행, 재시도, 웹 검색 등
+
+* 에이전트가 **무엇을 언제 실행하는가**를 정의
+* 페이지 선택, OCR/Vision 실행, 재시도, 웹 검색 등
 
 📄 문서: `agent-flow.md`
 
 ---
 
 ### 2. Decision Policy (판단 레이어)
-- 여러 후보 중 **어떤 정보를 신뢰할 것인가**를 정의
-- 출처 우선순위, confidence 계산, 충돌 해결
+
+* 여러 후보 중 **어떤 정보를 신뢰할 것인가**를 정의
+* 출처 우선순위, confidence 계산, 충돌 해결
 
 📄 문서: `decision-policy.md`
 
@@ -42,16 +44,19 @@
 ## 핵심 아이디어
 
 ### Image-first 전략
-- 오래된 논문, 스캔 PDF에서는 **이미지 기반 Vision 추출**이
+
+* 오래된 논문, 스캔 PDF에서는 **이미지 기반 Vision 추출**이
   OCR이나 정규식보다 신뢰도가 높다.
 
 ### Multi-source consensus
-- 하나의 정보는 항상 여러 출처 후보를 가진다.
-- 2개 이상 출처에서 일치할 경우 confidence가 상승한다.
+
+* 하나의 정보는 항상 여러 출처 후보를 가진다.
+* 2개 이상 출처에서 일치할 경우 confidence가 상승한다.
 
 ### Provenance 중심 설계
-- 모든 필드는 반드시 **근거(evidence)** 와 함께 저장된다.
-- 자동화 결과는 항상 사용자 검수가 가능해야 한다.
+
+* 모든 필드는 반드시 **근거(evidence)** 와 함께 저장된다.
+* 자동화 결과는 항상 사용자 검수가 가능해야 한다.
 
 ---
 
@@ -65,16 +70,19 @@
 ## 입력과 출력
 
 ### 입력
-- PDF (텍스트 PDF / 스캔 PDF / 하이브리드)
-- 단일 이미지 (표지, 타이틀 페이지)
+
+* PDF (텍스트 PDF / 스캔 PDF / 하이브리드)
+* 단일 이미지 (표지, 타이틀 페이지)
 
 ### 출력
-- 서지 레코드
-  - CSL-JSON
-  - RIS
-  - BibTeX
-- evidence (페이지 번호 + 텍스트/이미지 근거)
-- status: `confirmed / needs_review / failed`
+
+* 서지 레코드
+
+  * CSL-JSON
+  * RIS
+  * BibTeX
+* evidence (페이지 번호 + 텍스트/이미지 근거)
+* status: `confirmed / needs_review / failed`
 
 ---
 
@@ -93,18 +101,18 @@ docs/
 
 ## 활용 시나리오
 
-- 로컬 CLI 기반 PDF 정리 도구
-- Zotero 연동 전처리 파이프라인
-- 대규모 레거시 문헌 아카이빙
-- 고생물학·지질학 등 **구 논문 비중이 높은 분야 특화 시스템**
+* 로컬 CLI 기반 PDF 정리 도구
+* Zotero 연동 전처리 파이프라인
+* 대규모 레거시 문헌 아카이빙
+* 고생물학·지질학 등 **구 논문 비중이 높은 분야 특화 시스템**
 
 ---
 
 ## 설계 철학 요약
 
-- 자동화는 **정확성보다 설명 가능성**을 우선한다
-- 실패는 오류가 아니라 하나의 상태이다
-- 인간 검수는 예외가 아니라 시스템의 일부이다
+* 자동화는 **정확성보다 설명 가능성**을 우선한다
+* 실패는 오류가 아니라 하나의 상태이다
+* 인간 검수는 예외가 아니라 시스템의 일부이다
 
 ---
 
@@ -120,101 +128,47 @@ docs/
 ```mermaid
 flowchart TB
 
-%% ===== Entry =====
-A[Input
-- PDF (born-digital / scanned / hybrid)
-- Optional: single image (cover/title page)] --> B[Initial Analysis
-- page count
-- filename/created date
-- text-layer detection
-- quick DOI sniff]
+A[Input<br/>PDF: born-digital | scanned | hybrid<br/>Optional single image] --> B[Initial Analysis<br/>page count<br/>filename / created date<br/>text-layer detection<br/>quick DOI sniff]
 
-%% ===== Page selection & rendering =====
-B --> C[Select Candidate Pages
-Default: p1, p2, last
-Optional: p3, last-1, TOC]
-C --> D[Render Pages
-- low-res for structure
-- hi-res 200–300dpi for OCR & evidence]
+B --> C[Select Candidate Pages<br/>default: p1, p2, last<br/>optional: p3, last-1, TOC]
+C --> D[Render Pages<br/>low-res for structure<br/>hi-res 200–300dpi for OCR & evidence]
 
-%% ===== Extraction branches =====
 D --> E{Text Layer Sufficient?}
-E -- Yes --> F[Text Extraction
-- per-page text blocks]
-E -- No --> G[OCR
-- multi-language
-- per-page text + (optional) bboxes]
+E -- Yes --> F[Text Extraction<br/>per-page text blocks]
+E -- No --> G[OCR<br/>multi-language<br/>per-page text + optional bboxes]
 
-%% ===== Candidate generation =====
-F --> H[Regex / Rules
-- DOI, year, pages, volume/issue, series, place]
+F --> H[Regex and Rules<br/>DOI, year, pages<br/>volume, issue, series, place]
 G --> H
 
-D --> I[Vision Extraction (Image-first)
-- parse title/author/journal/year/DOI
-- evidence from p1/p2/last]
+D --> I[Vision Extraction (Image-first)<br/>title, authors, journal, year, DOI<br/>evidence from p1 / p2 / last]
 
-H --> J[LLM Text Parsing
-- structured JSON
-- evidence & confidence
-(input limited to p1/p2/last blocks)]
+H --> J[LLM Text Parsing<br/>structured JSON<br/>evidence and confidence<br/>input limited to p1 / p2 / last]
 
-%% ===== External verification =====
-H --> K[External Bibliographic DB
-- Crossref (primary)
-- OpenAlex (optional)
-Query: DOI > title+author+year]
+H --> K[External Bibliographic DB<br/>Crossref primary<br/>OpenAlex optional<br/>query: DOI or title+author+year]
 I --> K
 J --> K
 
-%% ===== Aggregation & decision =====
-K --> L[Candidate Pool
-sources: pdf_meta, regex, llm_text, vision, crossref, web]
-H --> L
+H --> L[Candidate Pool]
 I --> L
 J --> L
+K --> L
 
-L --> M[Decision Policy
-(decision-policy.md)
-- source priority per field
-- consensus bonus
-- conflict penalties
-- provenance recording]
+L --> M[Decision Policy<br/>source priority per field<br/>consensus bonus<br/>conflict penalties<br/>provenance recording]
 
-%% ===== Agent loop =====
-M --> N{Missing/Low-Confidence Fields?}
-N -- Yes --> O[Agent Expansion Loop
-- add pages (last-1 / TOC / headers)
-- rerun OCR/Vision/Text parse
-- bounded retries]
+M --> N{Missing or Low-Confidence Fields?}
+N -- Yes --> O[Agent Expansion Loop<br/>add pages: last-1, TOC, headers<br/>rerun OCR, Vision, parsing<br/>bounded retries]
 O --> C
 
-N -- No --> P[Finalize Record
-- CSL-JSON / RIS / BibTeX
-- evidence bundle
-- status: confirmed/needs_review/failed]
+N -- No --> P[Finalize Record<br/>CSL-JSON, RIS, BibTeX<br/>evidence bundle<br/>status assigned]
 
-%% ===== Optional web search =====
 M --> Q{Need Web Augmentation?}
-Q -- Yes --> R[Web Search (fallback)
-- title+author+year
-- keep original language
-- store evidence]
+Q -- Yes --> R[Web Search Fallback<br/>title + author + year<br/>keep original language<br/>store evidence]
 R --> L
 Q -- No --> N
 
-%% ===== UI Review =====
-P --> S[User Review UI (optional)
-- evidence viewer (left)
-- fields form (right)
-- approve / edit / retry]
-
-%% ===== Notes =====
-classDef layer fill:#f7f7f7,stroke:#999,color:#222;
-class A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S layer;
+P --> S[User Review UI optional<br/>evidence viewer<br/>field form<br/>approve, edit, retry]
 ```
 
 ---
 
 (End of README.md)
-
