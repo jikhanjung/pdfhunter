@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-PDFHunter is a bibliographic metadata extraction agent system that automatically extracts bibliographic information from PDF documents (scanned/OCR-required and text PDFs) and single images.
+PDFResolve is a bibliographic metadata extraction agent system that automatically extracts bibliographic information from PDF documents (scanned/OCR-required and text PDFs) and single images.
 
 ## Development Commands
 
@@ -19,7 +19,7 @@ pytest
 pytest tests/test_models.py
 
 # Run with coverage
-pytest --cov=pdfhunter
+pytest --cov=pdfresolve
 
 # Lint
 ruff check src/
@@ -28,15 +28,15 @@ ruff check src/
 ruff format src/
 
 # CLI usage
-pdfhunter --help
-pdfhunter info <file.pdf>
-pdfhunter extract <file.pdf> -o output.json
+pdfresolve --help
+pdfresolve info <file.pdf>
+pdfresolve extract <file.pdf> -o output.json
 ```
 
 ## Project Structure
 
 ```
-src/pdfhunter/
+src/pdfresolve/
 ├── cli.py              # CLI entry point (typer)
 ├── core/
 │   ├── config.py       # Configuration (Pydantic)

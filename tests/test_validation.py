@@ -2,15 +2,15 @@
 
 import pytest
 
-from pdfhunter.models.bibliography import RecordStatus
-from pdfhunter.validation.scorer import (
+from pdfresolve.models.bibliography import RecordStatus
+from pdfresolve.validation.scorer import (
     ConfidenceScorer,
     DocumentType,
     FieldScore,
     ScoringResult,
     create_scorer,
 )
-from pdfhunter.validation.validator import (
+from pdfresolve.validation.validator import (
     FieldValidator,
     RecordValidator,
     ValidationIssue,

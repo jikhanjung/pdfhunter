@@ -1,15 +1,15 @@
 """Extraction modules for text and OCR processing."""
 
-from pdfhunter.extraction.ocr_extractor import (
+from pdfresolve.extraction.ocr_extractor import (
     OCRBlock,
     OCRExtractor,
     OCRResult,
     TesseractExtractor,
     create_ocr_extractor,
 )
-from pdfhunter.extraction.page_selector import PageRole, PageSelector, SelectedPage
-from pdfhunter.extraction.preprocessor import ImagePreprocessor, create_default_preprocessor
-from pdfhunter.extraction.text_extractor import (
+from pdfresolve.extraction.page_selector import PageRole, PageSelector, SelectedPage
+from pdfresolve.extraction.preprocessor import ImagePreprocessor, create_default_preprocessor
+from pdfresolve.extraction.text_extractor import (
     TextBlock,
     TextExtractionResult,
     TextExtractor,

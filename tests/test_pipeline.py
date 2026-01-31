@@ -4,11 +4,11 @@ import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from pdfhunter.core.document import Document
-from pdfhunter.core.pipeline import Pipeline
-from pdfhunter.parsing.llm_extractor import LLMExtractionResult
-from pdfhunter.parsing.rule_based import ExtractionResult as RuleResult
-from pdfhunter.parsing.patterns import PatternMatch
+from pdfresolve.core.document import Document
+from pdfresolve.core.pipeline import Pipeline
+from pdfresolve.parsing.llm_extractor import LLMExtractionResult
+from pdfresolve.parsing.rule_based import ExtractionResult as RuleResult
+from pdfresolve.parsing.patterns import PatternMatch
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def dummy_pdf_path() -> Path:
 class TestPipeline:
     def test_pipeline_initialization(self):
         # The constructor now calls the enricher, so we patch it
-        with patch("pdfhunter.core.pipeline.WebSearchEnricher"):
+        with patch("pdfresolve.core.pipeline.WebSearchEnricher"):
             pipeline = Pipeline()
             assert pipeline.config is not None
             assert pipeline.text_extractor is not None
@@ -32,7 +32,7 @@ class TestPipeline:
             assert pipeline.llm_extractor is not None
             assert pipeline.merger is not None
 
-    @patch("pdfhunter.enrichment.web_search.scholarly")
+    @patch("pdfresolve.enrichment.web_search.scholarly")
     def test_run_pipeline_text_pdf(self, mock_scholarly, dummy_pdf_path):
         """
         Tests the full pipeline run on a text-based PDF with the new evidence flow.

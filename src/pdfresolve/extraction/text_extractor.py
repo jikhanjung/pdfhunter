@@ -6,7 +6,7 @@ from typing import Any
 
 import pdfplumber
 
-from pdfhunter.models.evidence import BoundingBox
+from pdfresolve.models.evidence import BoundingBox
 
 
 @dataclass

@@ -4,25 +4,25 @@ import json
 import pytest
 from pathlib import Path
 
-from pdfhunter.models.bibliography import (
+from pdfresolve.models.bibliography import (
     Author,
     BibliographyRecord,
     DateParts,
 )
-from pdfhunter.export.csl_json import (
+from pdfresolve.export.csl_json import (
     export_csl_json,
     export_csl_json_string,
     load_csl_json,
     record_to_csl_json,
     records_to_csl_json,
 )
-from pdfhunter.export.ris import (
+from pdfresolve.export.ris import (
     export_ris,
     export_ris_string,
     record_to_ris,
     records_to_ris,
 )
-from pdfhunter.export.bibtex import (
+from pdfresolve.export.bibtex import (
     escape_bibtex,
     export_bibtex,
     export_bibtex_string,

@@ -26,8 +26,8 @@
 - [ ] BibTeX 형식으로 내보내기가 동작한다.
 
 ### 6. CLI
-- [ ] `pdfhunter info <file.pdf>`: 문서 기본 정보를 표시한다.
-- [ ] `pdfhunter extract <file.pdf> -o output.json`: 서지 정보를 추출하여 파일로 저장한다.
+- [ ] `pdfresolve info <file.pdf>`: 문서 기본 정보를 표시한다.
+- [ ] `pdfresolve extract <file.pdf> -o output.json`: 서지 정보를 추출하여 파일로 저장한다.
 
 ### 7. 사용자 검수 UI
 - [ ] PDF 업로드 후 추출 결과를 확인할 수 있다.

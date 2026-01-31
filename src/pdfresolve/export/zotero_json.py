@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from pdfhunter.models.bibliography import BibliographyRecord
+from pdfresolve.models.bibliography import BibliographyRecord
 
 
 def record_to_zotero_json(record: BibliographyRecord) -> dict[str, Any]:

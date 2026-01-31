@@ -1,4 +1,4 @@
-"""Configuration management for PDFHunter."""
+"""Configuration management for PDFResolve."""
 
 import os
 from pathlib import Path
@@ -66,7 +66,7 @@ class LLMConfig(BaseModel):
 
 
 class Config(BaseSettings):
-    """Main configuration for PDFHunter.
+    """Main configuration for PDFResolve.
 
     Loads settings from environment variables and .env file.
     Environment variable names are prefixed with PDFHUNTER_ or use standard names.

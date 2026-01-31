@@ -2,14 +2,14 @@
 
 import pytest
 
-from pdfhunter.extraction.text_extractor import (
+from pdfresolve.extraction.text_extractor import (
     TextBlock,
     TextExtractionResult,
     TextExtractor,
     TextRegionExtractor,
     create_text_extractor,
 )
-from pdfhunter.models.evidence import BoundingBox
+from pdfresolve.models.evidence import BoundingBox
 
 
 class TestTextBlock:

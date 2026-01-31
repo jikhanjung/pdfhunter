@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from pdfhunter.models.evidence import Evidence
+from pdfresolve.models.evidence import Evidence
 
 
 class RecordStatus(str, Enum):
@@ -91,7 +91,7 @@ class BibliographyRecord(BaseModel):
     language: str | None = None
     abstract: str | None = None
 
-    # PDFHunter-specific fields
+    # PDFResolve-specific fields
     status: RecordStatus = RecordStatus.NEEDS_REVIEW
     confidence: float = Field(ge=0.0, le=1.0, default=0.0)
     evidence: list[Evidence] = Field(default_factory=list)

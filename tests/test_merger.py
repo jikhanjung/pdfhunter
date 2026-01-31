@@ -2,11 +2,11 @@
 
 import pytest
 
-from pdfhunter.core.merger import Merger
-from pdfhunter.parsing.rule_based import ExtractionResult as RuleResult
-from pdfhunter.parsing.llm_extractor import LLMExtractionResult as LLMResult
-from pdfhunter.models.bibliography import DateParts
-from pdfhunter.parsing.patterns import PatternMatch
+from pdfresolve.core.merger import Merger
+from pdfresolve.parsing.rule_based import ExtractionResult as RuleResult
+from pdfresolve.parsing.llm_extractor import LLMExtractionResult as LLMResult
+from pdfresolve.models.bibliography import DateParts
+from pdfresolve.parsing.patterns import PatternMatch
 
 class TestMerger:
 

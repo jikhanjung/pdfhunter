@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Any
 
-from pdfhunter.parsing.patterns import (
+from pdfresolve.parsing.patterns import (
     COMPILED_DOI_PATTERNS,
     COMPILED_IDENTIFIER_PATTERNS,
     COMPILED_ISSUE_PATTERNS,

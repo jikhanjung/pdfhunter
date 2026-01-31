@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from pdfhunter.models.bibliography import BibliographyRecord
+from pdfresolve.models.bibliography import BibliographyRecord
 
 
 # CSL type to BibTeX type mapping

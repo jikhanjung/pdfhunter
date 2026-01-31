@@ -1,4 +1,4 @@
-"""Logging configuration for PDFHunter."""
+"""Logging configuration for PDFResolve."""
 
 import logging
 import sys
@@ -9,7 +9,7 @@ def setup_logging(
     level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO",
     format_string: str | None = None,
 ) -> logging.Logger:
-    """Set up logging for PDFHunter.
+    """Set up logging for PDFResolve.
 
     Args:
         level: Logging level
@@ -22,7 +22,7 @@ def setup_logging(
         format_string = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 
     # Create logger
-    logger = logging.getLogger("pdfhunter")
+    logger = logging.getLogger("pdfresolve")
     logger.setLevel(getattr(logging, level))
 
     # Remove existing handlers
@@ -42,15 +42,15 @@ def setup_logging(
     return logger
 
 
-def get_logger(name: str = "pdfhunter") -> logging.Logger:
+def get_logger(name: str = "pdfresolve") -> logging.Logger:
     """Get a logger instance.
 
     Args:
-        name: Logger name (will be prefixed with 'pdfhunter.')
+        name: Logger name (will be prefixed with 'pdfresolve.')
 
     Returns:
         Logger instance
     """
-    if not name.startswith("pdfhunter"):
-        name = f"pdfhunter.{name}"
+    if not name.startswith("pdfresolve"):
+        name = f"pdfresolve.{name}"
     return logging.getLogger(name)

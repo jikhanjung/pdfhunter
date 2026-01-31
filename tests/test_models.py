@@ -2,13 +2,13 @@
 
 import pytest
 
-from pdfhunter.models.bibliography import (
+from pdfresolve.models.bibliography import (
     Author,
     BibliographyRecord,
     DateParts,
     RecordStatus,
 )
-from pdfhunter.models.evidence import BoundingBox, Evidence, EvidenceType
+from pdfresolve.models.evidence import BoundingBox, Evidence, EvidenceType
 
 
 class TestAuthor:

@@ -4,8 +4,8 @@ import pytest
 import uuid
 from unittest.mock import patch
 
-from pdfhunter.enrichment.web_search import WebSearchEnricher
-from pdfhunter.models.bibliography import BibliographyRecord, Author
+from pdfresolve.enrichment.web_search import WebSearchEnricher
+from pdfresolve.models.bibliography import BibliographyRecord, Author
 
 
 class TestWebSearchEnricher:
@@ -13,7 +13,7 @@ class TestWebSearchEnricher:
         enricher = WebSearchEnricher()
         assert enricher is not None
 
-    @patch("pdfhunter.enrichment.web_search.scholarly")
+    @patch("pdfresolve.enrichment.web_search.scholarly")
     def test_enrich_with_mock_search(self, mock_scholarly):
         """
         Tests that the enrich method correctly merges data from a web search.

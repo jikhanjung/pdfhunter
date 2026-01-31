@@ -4,13 +4,13 @@ from unittest.mock import patch, MagicMock
 
 from PIL import Image
 
-from pdfhunter.core.document import Document
-from pdfhunter.core.pipeline import Pipeline
-from pdfhunter.enrichment.expansion import ExpansionAgent
-from pdfhunter.models.bibliography import BibliographyRecord, Author, RecordStatus
-from pdfhunter.parsing.rule_based import ExtractionResult as RuleResult
-from pdfhunter.extraction.ocr_extractor import OCRResult, OCRExtractor
-from pdfhunter.parsing.patterns import PatternMatch
+from pdfresolve.core.document import Document
+from pdfresolve.core.pipeline import Pipeline
+from pdfresolve.enrichment.expansion import ExpansionAgent
+from pdfresolve.models.bibliography import BibliographyRecord, Author, RecordStatus
+from pdfresolve.parsing.rule_based import ExtractionResult as RuleResult
+from pdfresolve.extraction.ocr_extractor import OCRResult, OCRExtractor
+from pdfresolve.parsing.patterns import PatternMatch
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ def incomplete_record_missing_publisher() -> BibliographyRecord:
 
 class TestExpansionAgent:
 
-    @patch("pdfhunter.enrichment.web_search.scholarly")
+    @patch("pdfresolve.enrichment.web_search.scholarly")
     def test_agent_finds_running_headers(self, mock_scholarly, dummy_pdf_path, incomplete_article_record):
         """
         Tests that the agent correctly decides to find running headers
@@ -99,7 +99,7 @@ class TestExpansionAgent:
         # The agent should determine the final status
         assert final_record.status == RecordStatus.NEEDS_REVIEW
 
-    @patch("pdfhunter.enrichment.web_search.scholarly")
+    @patch("pdfresolve.enrichment.web_search.scholarly")
     def test_agent_finds_publication_info(self, mock_scholarly, dummy_pdf_path, incomplete_record_missing_publisher):
         """
         Tests that the agent correctly decides to find publication info on last pages
@@ -131,7 +131,7 @@ class TestExpansionAgent:
         )
 
         # Mock LLM extractor to find publisher
-        from pdfhunter.parsing.llm_extractor import LLMExtractionResult # Debug import
+        from pdfresolve.parsing.llm_extractor import LLMExtractionResult # Debug import
         pipeline.llm_extractor.extract = MagicMock(
             return_value=LLMExtractionResult(publisher="Example Press")
         )

@@ -1,17 +1,17 @@
 """Parsing modules for rule-based and LLM extraction."""
 
-from pdfhunter.parsing.patterns import (
+from pdfresolve.parsing.patterns import (
     PatternMatch,
     is_valid_year,
     normalize_page_range,
     roman_to_int,
 )
-from pdfhunter.parsing.rule_based import (
+from pdfresolve.parsing.rule_based import (
     ExtractionResult,
     RuleBasedExtractor,
     create_rule_based_extractor,
 )
-from pdfhunter.parsing.llm_extractor import (
+from pdfresolve.parsing.llm_extractor import (
     LLMExtractionResult,
     LLMExtractor,
     MockLLMExtractor,

@@ -1,1 +1,1 @@
-"""Tests for PDFHunter."""
+"""Tests for PDFResolve."""

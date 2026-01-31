@@ -6,7 +6,7 @@ from typing import Any, Literal
 
 from PIL import Image
 
-from pdfhunter.models.evidence import BoundingBox
+from pdfresolve.models.evidence import BoundingBox
 
 
 @dataclass
@@ -137,7 +137,7 @@ class OCRExtractor:
 
         # Preprocess if requested
         if preprocess:
-            from pdfhunter.extraction.preprocessor import create_default_preprocessor
+            from pdfresolve.extraction.preprocessor import create_default_preprocessor
 
             preprocessor = create_default_preprocessor()
             image = preprocessor.process(image)
@@ -284,7 +284,7 @@ class TesseractExtractor:
 
         # Preprocess if requested
         if preprocess:
-            from pdfhunter.extraction.preprocessor import create_default_preprocessor
+            from pdfresolve.extraction.preprocessor import create_default_preprocessor
 
             preprocessor = create_default_preprocessor()
             image = preprocessor.process(image)

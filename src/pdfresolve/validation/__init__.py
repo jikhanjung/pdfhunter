@@ -1,13 +1,13 @@
 """Validation and scoring modules."""
 
-from pdfhunter.validation.scorer import (
+from pdfresolve.validation.scorer import (
     ConfidenceScorer,
     DocumentType,
     FieldScore,
     ScoringResult,
     create_scorer,
 )
-from pdfhunter.validation.validator import (
+from pdfresolve.validation.validator import (
     FieldValidator,
     RecordValidator,
     ValidationIssue,

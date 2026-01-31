@@ -10,14 +10,14 @@ from unittest.mock import MagicMock
 import sys
 sys.modules['streamlit'] = MagicMock()
 
-from pdfhunter.ui.review_ui import main_app
-from pdfhunter.core.pipeline import Pipeline
-from pdfhunter.models.bibliography import BibliographyRecord
+from pdfresolve.ui.review_ui import main_app
+from pdfresolve.core.pipeline import Pipeline
+from pdfresolve.models.bibliography import BibliographyRecord
 
 class TestReviewUI:
 
-    @patch("pdfhunter.ui.review_ui.Pipeline")
-    @patch("pdfhunter.ui.review_ui.Document")
+    @patch("pdfresolve.ui.review_ui.Pipeline")
+    @patch("pdfresolve.ui.review_ui.Document")
     def test_main_app_file_processing(self, mock_document, mock_pipeline):
         """
         Tests that the main_app function correctly processes an uploaded file.

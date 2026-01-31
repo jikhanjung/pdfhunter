@@ -1,4 +1,4 @@
-"""Streamlit review UI for PDFHunter."""
+"""Streamlit review UI for PDFResolve."""
 
 import sys
 from pathlib import Path
@@ -111,7 +111,7 @@ def main_app():
         raise ImportError("Streamlit is required for the review UI")
 
     st.set_page_config(layout="wide")
-    st.title("PDFHunter: Document Upload")
+    st.title("PDFResolve: Document Upload")
 
     uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
 

@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
-from pdfhunter.core.document import Document, DocumentType
+from pdfresolve.core.document import Document, DocumentType
 
 
 class PageRole(str, Enum):

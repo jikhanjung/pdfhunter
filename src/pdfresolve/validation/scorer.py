@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from pdfhunter.models.bibliography import RecordStatus
+from pdfresolve.models.bibliography import RecordStatus
 
 
 class DocumentType(str, Enum):

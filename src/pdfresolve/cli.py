@@ -1,4 +1,4 @@
-"""Command-line interface for PDFHunter."""
+"""Command-line interface for PDFResolve."""
 
 from pathlib import Path
 from typing import Optional
@@ -8,21 +8,21 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from pdfhunter import __version__
-from pdfhunter.core.config import Config
-from pdfhunter.core.document import Document
-from pdfhunter.core.pipeline import Pipeline
-from pdfhunter.extraction.page_selector import PageSelector
-from pdfhunter.export import export_csl_json, export_ris, export_bibtex, export_zotero_json
-from pdfhunter.export.csl_json import export_csl_json_string
-from pdfhunter.export.ris import export_ris_string
-from pdfhunter.export.bibtex import export_bibtex_string
-from pdfhunter.export.zotero_json import export_zotero_json_string
-from pdfhunter.models.bibliography import RecordStatus
-from pdfhunter.utils.logging import setup_logging
+from pdfresolve import __version__
+from pdfresolve.core.config import Config
+from pdfresolve.core.document import Document
+from pdfresolve.core.pipeline import Pipeline
+from pdfresolve.extraction.page_selector import PageSelector
+from pdfresolve.export import export_csl_json, export_ris, export_bibtex, export_zotero_json
+from pdfresolve.export.csl_json import export_csl_json_string
+from pdfresolve.export.ris import export_ris_string
+from pdfresolve.export.bibtex import export_bibtex_string
+from pdfresolve.export.zotero_json import export_zotero_json_string
+from pdfresolve.models.bibliography import RecordStatus
+from pdfresolve.utils.logging import setup_logging
 
 app = typer.Typer(
-    name="pdfhunter",
+    name="pdfresolve",
     help="Automatic bibliographic metadata extraction from PDF documents.",
     add_completion=False,
 )
@@ -34,7 +34,7 @@ def main(
     ctx: typer.Context,
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose output"),
 ):
-    """PDFHunter: Extract bibliographic metadata from PDFs."""
+    """PDFResolve: Extract bibliographic metadata from PDFs."""
     log_level = "DEBUG" if verbose else "INFO"
     setup_logging(level=log_level)
     ctx.ensure_object(dict)
@@ -44,7 +44,7 @@ def main(
 @app.command()
 def version():
     """Show version information."""
-    console.print(f"PDFHunter version {__version__}")
+    console.print(f"PDFResolve version {__version__}")
 
 
 @app.command()

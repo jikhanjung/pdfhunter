@@ -3,13 +3,13 @@
 import pytest
 from PIL import Image
 
-from pdfhunter.extraction.ocr_extractor import (
+from pdfresolve.extraction.ocr_extractor import (
     OCRBlock,
     OCRResult,
     create_ocr_extractor,
 )
-from pdfhunter.extraction.preprocessor import ImagePreprocessor, create_default_preprocessor
-from pdfhunter.models.evidence import BoundingBox
+from pdfresolve.extraction.preprocessor import ImagePreprocessor, create_default_preprocessor
+from pdfresolve.models.evidence import BoundingBox
 
 
 class TestOCRBlock:

@@ -1,4 +1,4 @@
-"""The main extraction pipeline for PDFHunter."""
+"""The main extraction pipeline for PDFResolve."""
 
 import logging
 import uuid
