@@ -64,6 +64,7 @@ venv.bak/
 
 # Project specific
 data/
+temp_uploads/
 
 # OS
 .DS_Store
