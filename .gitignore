@@ -63,10 +63,7 @@ venv.bak/
 *~
 
 # Project specific
-pdfs/
 data/
-*.pdf
-=1.7
 
 # OS
 .DS_Store
