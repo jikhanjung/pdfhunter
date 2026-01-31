@@ -80,7 +80,7 @@ def review_ui(record: BibliographyRecord, document: Document):
                                 if ev.field_name:
                                     draw.text((box[0], box[1] - 10), ev.field_name, fill="red")
 
-                        st.image(image, caption=f"Evidence on Page {selected_page}", use_column_width=True)
+                        st.image(image, caption=f"Evidence on Page {selected_page}", use_container_width=True)
 
                     except Exception as e:
                         st.error(f"Failed to render page {selected_page}: {e}")
@@ -111,38 +111,67 @@ def main_app():
         raise ImportError("Streamlit is required for the review UI")
 
     st.set_page_config(layout="wide")
-    st.title("PDFResolve: Document Upload")
+    st.title("PDFResolve")
 
-    uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+    tab_extract, tab_zotero = st.tabs(["Extract", "Zotero Library"])
 
-    if uploaded_file is not None:
-        if "processed_file" not in st.session_state or st.session_state.processed_file != uploaded_file.name:
-            st.session_state.processed_file = uploaded_file.name
-            st.session_state.record = None
-            st.session_state.document = None
+    with tab_extract:
+        # Check if a file was sent from the Zotero browser
+        zotero_file = st.session_state.pop("zotero_extract_file", None)
+        zotero_filename = st.session_state.pop("zotero_extract_filename", None)
 
-            temp_dir = Path("./temp_uploads")
-            temp_dir.mkdir(exist_ok=True)
-            temp_path = temp_dir / uploaded_file.name
-            with open(temp_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
+        if zotero_file:
+            temp_path = Path(zotero_file)
+            if temp_path.exists():
+                st.session_state.processed_file = zotero_filename
+                st.session_state.record = None
+                st.session_state.document = None
 
-            with st.spinner(f"Processing {uploaded_file.name}..."):
-                try:
-                    pipeline = Pipeline(use_mock_llm=False)
-                    doc = Document(temp_path)
-                    st.session_state.document = doc
-                    record = pipeline.run(doc)
-                    st.session_state.record = record
-                    st.success("Processing complete!")
-                except Exception as e:
-                    st.error(f"An error occurred during processing: {e}")
+                with st.spinner(f"Processing {zotero_filename}..."):
+                    try:
+                        pipeline = Pipeline(use_mock_llm=False)
+                        doc = Document(temp_path)
+                        st.session_state.document = doc
+                        record = pipeline.run(doc)
+                        st.session_state.record = record
+                        st.success(f"Processing complete: {zotero_filename}")
+                    except Exception as e:
+                        st.error(f"An error occurred during processing: {e}")
 
-    if "record" in st.session_state and st.session_state.record and st.session_state.document:
-        st.divider()
-        review_ui(st.session_state.record, st.session_state.document)
-    else:
-        st.info("Please upload a PDF to begin processing.")
+        uploaded_file = st.file_uploader("Choose a PDF file", type="pdf")
+
+        if uploaded_file is not None:
+            if "processed_file" not in st.session_state or st.session_state.processed_file != uploaded_file.name:
+                st.session_state.processed_file = uploaded_file.name
+                st.session_state.record = None
+                st.session_state.document = None
+
+                temp_dir = Path("./temp_uploads")
+                temp_dir.mkdir(exist_ok=True)
+                temp_path = temp_dir / uploaded_file.name
+                with open(temp_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+
+                with st.spinner(f"Processing {uploaded_file.name}..."):
+                    try:
+                        pipeline = Pipeline(use_mock_llm=False)
+                        doc = Document(temp_path)
+                        st.session_state.document = doc
+                        record = pipeline.run(doc)
+                        st.session_state.record = record
+                        st.success("Processing complete!")
+                    except Exception as e:
+                        st.error(f"An error occurred during processing: {e}")
+
+        if "record" in st.session_state and st.session_state.record and st.session_state.document:
+            st.divider()
+            review_ui(st.session_state.record, st.session_state.document)
+        else:
+            st.info("Please upload a PDF to begin processing.")
+
+    with tab_zotero:
+        from pdfresolve.ui.zotero_browser import zotero_browser
+        zotero_browser()
 
 
 if __name__ == "__main__":
